@@ -1,0 +1,290 @@
+AWSTemplateFormatVersion: 2010-09-09
+# 1 NAT
+# 1 EIP
+# 1 Private EC2 Instance
+# 1 Public EC2 Instance
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.1.0.0/16
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: vpc
+  # Internet Gateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: internet-gateway
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  # Public Subnets
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: us-east-1a
+      VpcId: !Ref VPC
+      CidrBlock: 10.1.1.0/24
+      Tags:
+        - Key: Name
+          Value: 10.1.1.0/24 - us-east-1a - public
+        - Key: private
+          Value: "false"
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: us-east-1b
+      VpcId: !Ref VPC
+      CidrBlock: 10.1.2.0/24
+      Tags:
+        - Key: Name
+          Value: 10.1.2.0/24 - us-east-1b - public
+        - Key: private
+          Value: "false"
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: us-east-1c
+      VpcId: !Ref VPC
+      CidrBlock: 10.1.3.0/24
+      Tags:
+        - Key: Name
+          Value: 10.1.3.0/24 - us-east-1c - public
+        - Key: private
+          Value: "false"
+  # Private Subnets
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-east-1d
+      VpcId: !Ref VPC
+      CidrBlock: 10.1.4.0/24
+      Tags:
+        - Key: Name
+          Value: 10.1.4.0/24 - us-east-1d - private
+        - Key: private
+          Value: "true"
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-east-1e
+      VpcId: !Ref VPC
+      CidrBlock: 10.1.5.0/24
+      Tags:
+        - Key: Name
+          Value: 10.1.5.0/24 - us-east-1e - private
+        - Key: private
+          Value: "true"
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-east-1f
+      VpcId: !Ref VPC
+      CidrBlock: 10.1.6.0/24
+      Tags:
+        - Key: Name
+          Value: 10.1.6.0/24 - us-east-1f - private
+        - Key: private
+          Value: "true"
+  # ACL's
+  PublicACL:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      Tags:
+        - Key: Name
+          Value: public-acl
+      VpcId: !Ref VPC
+  # port 80
+  PublicNetworkACLEntryIn80:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicACL
+      PortRange:
+        From: 80
+        To: 80
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 100
+  PublicNetworkACLEntryOut80:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      NetworkAclId: !Ref PublicACL
+      PortRange:
+        From: 80
+        To: 80
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 100
+  # port 443
+  PublicNetworkACLEntryIn443:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicACL
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 200
+  PublicNetworkACLEntryOut443:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      NetworkAclId: !Ref PublicACL
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 200
+  # port 22
+  PublicNetworkACLEntryIn22:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicACL
+      PortRange:
+        From: 22
+        To: 22
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 300
+  # Custom TCP Rule
+  PublicNetworkACLEntryIn4:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicACL
+      PortRange:
+        From: 1024
+        To: 65535
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 400
+  PublicNetworkACLEntryOut4:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      NetworkAclId: !Ref PublicACL
+      PortRange:
+        From: 1024
+        To: 65535
+      Protocol: 6
+      RuleAction: allow
+      RuleNumber: 400
+  PrivateACL:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      Tags:
+        - Key: Name
+          Value: private-acl
+      VpcId: !Ref VPC
+  PrivateNetworkACLEntryInAll:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateACL
+      Protocol: -1
+      RuleAction: allow
+      RuleNumber: 100
+  PrivateNetworkACLEntryOutAll:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      NetworkAclId: !Ref PrivateACL
+      Protocol: -1
+      RuleAction: allow
+      RuleNumber: 100
+  # ACL Associations
+  PublicSubnet1ACL:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref PublicACL
+      SubnetId: !Ref PublicSubnet1
+  PublicSubnet2ACL:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref PublicACL
+      SubnetId: !Ref PublicSubnet2
+  PublicSubnet3ACL:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref PublicACL
+      SubnetId: !Ref PublicSubnet3
+  PrivateSubnet1ACL:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref PrivateACL
+      SubnetId: !Ref PrivateSubnet1
+  PrivateSubnet2ACL:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref PrivateACL
+      SubnetId: !Ref PrivateSubnet2
+  PrivateSubnet3ACL:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref PrivateACL
+      SubnetId: !Ref PrivateSubnet3
+  # Public Subnet Routing Tables
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: public-route-table
+      VpcId: !Ref VPC
+  PublicSubnet1RouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+  PublicSubnet2RouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+  PublicSubnet3RouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet3
+  # Private Subnet Routing Tables
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: public-route-table
+      VpcId: !Ref VPC
+  PrivateSubnet1RouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnet1
+  PrivateSubnet2RouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnet2
+  PrivateSubnet3RouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnet3
