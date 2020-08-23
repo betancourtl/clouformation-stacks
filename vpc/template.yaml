@@ -6,9 +6,15 @@ Resources:
     Properties:
       CidrBlock: 10.1.0.0/16
       EnableDnsSupport: true
+      EnableDnsHostnames: true
       Tags:
         - Key: Name
           Value: vpc
+  Ipv6VPCCidrBlock:
+    Type: AWS::EC2::VPCCidrBlock
+    Properties:
+      AmazonProvidedIpv6CidrBlock: true
+      VpcId: !Ref VPC
   # Gateways
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -179,17 +185,17 @@ Resources:
         - Key: Name
           Value: public-route-table
       VpcId: !Ref VPC
-  PublicSubnet1RouteTable:
+  PublicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet1
-  PublicSubnet2RouteTable:
+  PublicSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet2
-  PublicSubnet3RouteTable:
+  PublicSubnet3RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTable
@@ -198,6 +204,12 @@ Resources:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+  PublicRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationIpv6CidrBlock: ::/0
       GatewayId: !Ref InternetGateway
       RouteTableId: !Ref PublicRouteTable
   ## Private Subnets
@@ -256,7 +268,7 @@ Resources:
     Properties:
       NetworkAclId: !Ref PrivateACL
       SubnetId: !Ref PrivateSubnet3
-  PrivateNetworkACLEntryInAll:
+  PrivateNetworkACLEntryInAllIPV4:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: 0.0.0.0/0
@@ -264,7 +276,7 @@ Resources:
       Protocol: -1
       RuleAction: allow
       RuleNumber: 100
-  PrivateNetworkACLEntryOutAll:
+  PrivateNetworkACLEntryOutAllIPV4:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: 0.0.0.0/0
@@ -273,6 +285,23 @@ Resources:
       Protocol: -1
       RuleAction: allow
       RuleNumber: 100
+  PrivateNetworkACLEntryInAllIPV6:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      Ipv6CidrBlock: ::/0
+      NetworkAclId: !Ref PrivateACL
+      Protocol: -1
+      RuleAction: allow
+      RuleNumber: 200
+  PrivateNetworkACLEntryOutAllIPV6:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      Ipv6CidrBlock: ::/0
+      Egress: true
+      NetworkAclId: !Ref PrivateACL
+      Protocol: -1
+      RuleAction: allow
+      RuleNumber: 200
   PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -280,17 +309,17 @@ Resources:
         - Key: Name
           Value: private-route-table
       VpcId: !Ref VPC
-  PrivateSubnet1RouteTable:
+  PrivateSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateSubnet1
-  PrivateSubnet2RouteTable:
+  PrivateSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateSubnet2
-  PrivateSubnet3RouteTable:
+  PrivateSubnet3RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTable
