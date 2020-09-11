@@ -2,11 +2,19 @@ Parameters:
   NameOfService:
     Description: stack description
     Type: String
-    Default: production server
+    Default: EC2 instance
   KeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access into the server
     Type: String
     Default: aws-eb
+  UserData:
+    Description: EC2 instance bootstrap script
+    Type: String
+    Default: "#!/bin/bash"
+  SubnetId:
+    Description: SubnetId
+    Type: String
+    Default: ""
 Mappings:
   RegionMap:
     us-east-1:
@@ -32,64 +40,16 @@ Resources:
           - !Ref AWS::Region
           - AMI
       SecurityGroupIds:
-        - !Ref EC2SecurityGroup
+        - !ImportValue SG-SecurityGroup1
       Tags:
         - Key: Name
           Value: !Ref NameOfService
       KeyName: !Ref KeyName
-      UserData:
-        "Fn::Base64": !Sub |
-          #!/bin/bash
-
-          ######################################################################
-          # Time Config
-          ######################################################################
-
-          # Changes the timezone so we can see relevant the log times.
-          sudo timedatectl set-timezone America/New_York
-
-          ######################################################################
-          # apache2
-          ######################################################################
-
-          # Install apache
-          sudo apt install apache2 -y
-
-          # Turn on mod_rewrite
-          sudo a2enmod rewrite -y
-
-          # Restart apache
-          sudo systemctl restart apache2
-
-          ######################################################################
-          # WebServer
-          ######################################################################
-
-          # cd into /var/www/html
-          cd /var/www/html
-
-          # write the content into our index.html file
-          echo "
-          <html>
-            <body>
-              <h1>My App</h1>
-            </body>
-          </html>
-          " | sudo tee ./index.html
-
-  EC2SecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Open Ports 22 and 80
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
+      SubnetId: !Ref SubnetId
+      "Fn::Transform":
+        Name: "AWS::Include"
+        Parameters:
+          Location: !Ref UserData
 Outputs:
   Website:
     Description: The Public DNS for the EC2 Instance

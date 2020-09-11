@@ -360,8 +360,13 @@ Outputs:
     Value: !Ref PrivateSubnet3
     Export:
       Name: VPC-PrivateSubnet3
-  SecurityGroup1:
+  SecurityGroup1ID:
     Description: SecurityGroup1ID
     Value: !Ref SecurityGroup1
     Export:
       Name: SG-SecurityGroup1
+  VPCID:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: VPCID
