@@ -1,1 +1,83 @@
-/usr/local/bin/cf
+#!/bin/bash
+
+# Settings
+ROOT_DIR="$HOME/code/cloudformation/"
+
+# AWS Bucket Settings
+TEMPLATE_BUCKET_NAME="cf-templates-g4ool1dn68hz-us-east-1"
+TEMPLATE_BUCKET_URI="s3://$TEMPLATE_BUCKET_NAME"
+
+# S3
+function sync_repo() {
+  # Move all the files from my root directory to the S3 bucket
+  # Exclude git files
+  aws s3 sync $ROOT_DIR $TEMPLATE_BUCKET_URI \
+    --delete \
+    --exclude ".git/*"
+}
+
+function getConfig() {
+  # files are relative to your current directory
+  config=$(jq '.' ./config.json)
+  REGION=$(echo $config | jq -r '.region')
+  STACK_NAME=$(echo $config | jq -r '.stackName')
+  TEMPLATE_BODY="file://$PWD/template.yaml"
+  TEMPLATE_PARAMETERS="file://$PWD/parameters.json"
+}
+
+# Create Stack
+function create_stack() {
+  get_config
+  aws cloudformation create-stack \
+    --stack-name $STACK_NAME \
+    --template-body $TEMPLATE_BODY \
+    --parameters $TEMPLATE_PARAMETERS \
+    --region $REGION
+}
+
+# Update Stack
+function update_stack() {
+  get_config
+  echo "Updating $STACK_NAME stack"
+  aws cloudformation update-stack \
+    --stack-name $STACK_NAME \
+    --template-body $TEMPLATE_BODY \
+    --parameters $TEMPLATE_PARAMETERS \
+    --region $REGION
+}
+
+# Delete Stack
+function delete_stack() {
+  get_config
+  echo "Deleting $1 stack"
+  aws cloudformation delete-stack \
+    --stack-name $STACK_NAME
+}
+
+function describe_stack_events() {
+  get_config
+  echo "Describing stack"
+  aws cloudformation describe-stack-events \
+    --stack-name $STACK_NAME
+}
+
+# Cancels an update operation
+function cancel_update() {
+  get_config
+  aws cloudformation cancel-update-stack \
+    --stack-name $STACK_NAME
+}
+
+function estimate_costs() {
+  get_config
+  aws cloudformation estimate-template-cost \
+    --template-body $TEMPLATE_BODY \
+    --parameters $TEMPLATE_PARAMETERS
+}
+
+# Sync files before running our scripts. We do this so we can use out macros,
+# and transforms without having to manually do this.
+sync_repo
+
+## Call our function
+"$@"
