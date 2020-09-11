@@ -1,0 +1,102 @@
+Parameters:
+  NameOfService:
+    Description: stack description
+    Type: String
+    Default: production server
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access into the server
+    Type: String
+    Default: aws-eb
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-003f19e0e687de1cd
+Resources:
+  # Create an elastic IP so that the ip address doesn't change.
+  IPAddress:
+    Type: AWS::EC2::EIP
+    # Add the Elastic IP to the EC2 instance.
+  IPAssoc:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId: !Ref "EC2Instance"
+      EIP: !Ref "IPAddress"
+    # Create the EC2 instance.
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId:
+        Fn::FindInMap:
+          - RegionMap
+          - !Ref AWS::Region
+          - AMI
+      SecurityGroupIds:
+        - !Ref EC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Ref NameOfService
+      KeyName: !Ref KeyName
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash
+
+          ######################################################################
+          # Time Config
+          ######################################################################
+
+          # Changes the timezone so we can see relevant the log times.
+          sudo timedatectl set-timezone America/New_York
+
+          ######################################################################
+          # apache2
+          ######################################################################
+
+          # Install apache
+          sudo apt install apache2 -y
+
+          # Turn on mod_rewrite
+          sudo a2enmod rewrite -y
+
+          # Restart apache
+          sudo systemctl restart apache2
+
+          ######################################################################
+          # WebServer
+          ######################################################################
+
+          # cd into /var/www/html
+          cd /var/www/html
+
+          # write the content into our index.html file
+          echo "
+          <html>
+            <body>
+              <h1>My App</h1>
+            </body>
+          </html>
+          " | sudo tee ./index.html
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open Ports 22 and 80
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+Outputs:
+  Website:
+    Description: The Public DNS for the EC2 Instance
+    Value: !Sub "http://${EC2Instance.PublicDnsName}"
+  InstanceId:
+    Description: InstanceId of the newly created EC2 instance
+    Value: !Ref "EC2Instance"
+  InstanceIPAddress:
+    Description: IP address of the newly created EC2 instance
+    Value: !Ref "IPAddress"

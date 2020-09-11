@@ -1,0 +1,35 @@
+Parameters:
+  IpAddressType:
+    Description: Type of IP address
+    Type: String
+    Default: ipv4
+  Name:
+    Description: Name of the load balancer.
+    Type: String
+    Default: My Load Balancer
+  Scheme:
+    Description: internet-facing or internal.
+    Type: String
+    Default: internet-facing
+  SecurityGroups:
+    Description: internet-facing or internal.
+    Type: CommaDelimitedList
+    Default: ""
+  Subnets:
+    Description: Subnets that the ALB can use to place resources.
+    Type: CommaDelimitedList
+    Default: ""
+  Type:
+    Description: Type of Load Balancer
+    Type: String
+    Default: application
+Resources:
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      IpAddressType: !Ref IpAddressType
+      Name: !Ref Name
+      Scheme: !Ref Scheme
+      SecurityGroups: !Ref SecurityGroups
+      Subnets: !Ref Subnets
+      Type: !Ref Type

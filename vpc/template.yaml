@@ -4,7 +4,7 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 10.1.0.0/16
+      CidrBlock: 10.0.0.0/16
       EnableDnsSupport: true
       EnableDnsHostnames: true
       Tags:
@@ -46,10 +46,10 @@ Resources:
       MapPublicIpOnLaunch: true
       AvailabilityZone: us-east-1a
       VpcId: !Ref VPC
-      CidrBlock: 10.1.1.0/24
+      CidrBlock: 10.0.1.0/24
       Tags:
         - Key: Name
-          Value: 10.1.1.0/24 - us-east-1a - public
+          Value: 10.0.1.0/24 - us-east-1a - public
         - Key: private
           Value: "false"
   PublicSubnet2:
@@ -58,10 +58,10 @@ Resources:
       MapPublicIpOnLaunch: true
       AvailabilityZone: us-east-1b
       VpcId: !Ref VPC
-      CidrBlock: 10.1.2.0/24
+      CidrBlock: 10.0.2.0/24
       Tags:
         - Key: Name
-          Value: 10.1.2.0/24 - us-east-1b - public
+          Value: 10.0.2.0/24 - us-east-1b - public
         - Key: private
           Value: "false"
   PublicSubnet3:
@@ -70,10 +70,10 @@ Resources:
       MapPublicIpOnLaunch: true
       AvailabilityZone: us-east-1c
       VpcId: !Ref VPC
-      CidrBlock: 10.1.3.0/24
+      CidrBlock: 10.0.3.0/24
       Tags:
         - Key: Name
-          Value: 10.1.3.0/24 - us-east-1c - public
+          Value: 10.0.3.0/24 - us-east-1c - public
         - Key: private
           Value: "false"
   PublicACL:
@@ -109,34 +109,10 @@ Resources:
       Protocol: 6
       RuleAction: allow
       RuleNumber: 100
-  PublicNetworkACLEntryOut80:
-    Type: AWS::EC2::NetworkAclEntry
-    Properties:
-      CidrBlock: 0.0.0.0/0
-      Egress: true
-      NetworkAclId: !Ref PublicACL
-      PortRange:
-        From: 80
-        To: 80
-      Protocol: 6
-      RuleAction: allow
-      RuleNumber: 100
   PublicNetworkACLEntryIn443:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: 0.0.0.0/0
-      NetworkAclId: !Ref PublicACL
-      PortRange:
-        From: 443
-        To: 443
-      Protocol: 6
-      RuleAction: allow
-      RuleNumber: 200
-  PublicNetworkACLEntryOut443:
-    Type: AWS::EC2::NetworkAclEntry
-    Properties:
-      CidrBlock: 0.0.0.0/0
-      Egress: true
       NetworkAclId: !Ref PublicACL
       PortRange:
         From: 443
@@ -166,18 +142,15 @@ Resources:
       Protocol: 6
       RuleAction: allow
       RuleNumber: 400
-  PublicNetworkACLEntryOutCustom:
+  PublicNetworkACLEntryOutAll:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
       CidrBlock: 0.0.0.0/0
       Egress: true
       NetworkAclId: !Ref PublicACL
-      PortRange:
-        From: 1024
-        To: 65535
-      Protocol: 6
+      Protocol: -1
       RuleAction: allow
-      RuleNumber: 400
+      RuleNumber: 100
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -218,10 +191,10 @@ Resources:
     Properties:
       AvailabilityZone: us-east-1d
       VpcId: !Ref VPC
-      CidrBlock: 10.1.4.0/24
+      CidrBlock: 10.0.4.0/24
       Tags:
         - Key: Name
-          Value: 10.1.4.0/24 - us-east-1d - private
+          Value: 10.0.4.0/24 - us-east-1d - private
         - Key: private
           Value: "true"
   PrivateSubnet2:
@@ -229,10 +202,10 @@ Resources:
     Properties:
       AvailabilityZone: us-east-1e
       VpcId: !Ref VPC
-      CidrBlock: 10.1.5.0/24
+      CidrBlock: 10.0.5.0/24
       Tags:
         - Key: Name
-          Value: 10.1.5.0/24 - us-east-1e - private
+          Value: 10.0.5.0/24 - us-east-1e - private
         - Key: private
           Value: "true"
   PrivateSubnet3:
@@ -240,10 +213,10 @@ Resources:
     Properties:
       AvailabilityZone: us-east-1f
       VpcId: !Ref VPC
-      CidrBlock: 10.1.6.0/24
+      CidrBlock: 10.0.6.0/24
       Tags:
         - Key: Name
-          Value: 10.1.6.0/24 - us-east-1f - private
+          Value: 10.0.6.0/24 - us-east-1f - private
         - Key: private
           Value: "true"
   PrivateACL:
@@ -330,3 +303,65 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NATGateway
       RouteTableId: !Ref PrivateRouteTable
+  # Security Groups
+  SecurityGroup1:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to client host
+      GroupName: VPC Security Group 1
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIpv6: ::/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: VPC Security Group
+Outputs:
+  PublicSubnet1ID:
+    Description: Public subnet ID
+    Value: !Ref PublicSubnet1
+    Export:
+      Name: VPC-PublicSubnet1
+  PublicSubnet2ID:
+    Description: Public subnet ID
+    Value: !Ref PublicSubnet2
+    Export:
+      Name: VPC-PublicSubnet2
+  PublicSubnet3ID:
+    Description: Public subnet ID
+    Value: !Ref PublicSubnet3
+    Export:
+      Name: VPC-PublicSubnet3
+  PrivateSubnet1ID:
+    Description: Private subnet ID
+    Value: !Ref PrivateSubnet1
+    Export:
+      Name: VPC-PrivateSubnet1
+  PrivateSubnet2ID:
+    Description: Private subnet ID
+    Value: !Ref PrivateSubnet2
+    Export:
+      Name: VPC-PrivateSubnet2
+  PrivateSubnet3ID:
+    Description: Private subnet ID
+    Value: !Ref PrivateSubnet3
+    Export:
+      Name: VPC-PrivateSubnet3
+  SecurityGroup1:
+    Description: SecurityGroup1ID
+    Value: !Ref SecurityGroup1
+    Export:
+      Name: SG-SecurityGroup1
