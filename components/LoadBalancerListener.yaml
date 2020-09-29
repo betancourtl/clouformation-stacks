@@ -1,0 +1,20 @@
+Parameters:
+  LoadBalancerArn:
+    Description: The HealthCheckProtocol TCP/UDP etc.
+    Type: String
+  Port:
+    Description: The HealthCheckProtocol TCP/UDP etc.
+    Type: String
+  Protocol:
+    Description: The HealthCheckProtocol TCP/UDP etc.
+    Type: String
+    Default: TCP
+Resources:
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+      LoadBalancerArn: !Ref LoadBalancerArn
+      Port: !Ref Port
+      Protocol: !Ref Protocol

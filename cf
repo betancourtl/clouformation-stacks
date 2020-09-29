@@ -20,7 +20,7 @@ function get_config() {
   config=$(jq '.' ./config.json)
   REGION=$(echo $config | jq -r '.region')
   STACK_NAME=$(echo $config | jq -r '.stackName')
-  TEMPLATE_BODY="file://$PWD/template.yaml"
+  TEMPLATE_BODY="file://$PWD/stack.yaml"
   TEMPLATE_PARAMETERS="file://$PWD/parameters.json"
 }
 

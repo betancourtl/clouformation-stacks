@@ -1,0 +1,99 @@
+Parameters:
+  HealthCheckEnabled:
+    Description: If the healthcheck is enabled.
+    AllowedValues: [true, false]
+    Default: True
+    Type: String
+  HealthCheckIntervalSeconds:
+    Description: Intervals to check the health checks.
+    Default: 30
+    Type: Number
+  HealthCheckPath:
+    Description: The path to healthcheck.
+    Default: /
+    Type: String
+  HealthCheckPort:
+    Description: The Port to healthcheck.
+    Default: traffic-port
+    Type: String
+  HealthCheckProtocol:
+    Description: The HealthCheckProtocol TCP/UDP etc.
+    AllowedValues: [HTTP, HTTPS, TCP, TCP_UDP, TLS, UDP]
+    Default: TCP
+    Type: String
+  HealthCheckTimeoutSeconds:
+    Description: The amount of time, in seconds, during which no response from a target means a failed health check.
+    Default: 5
+    Type: Number
+  HealthyThresholdCount:
+    Description: The number of consecutive health checks successes required before considering an unhealthy target healthy.
+    Default: 5
+    Type: Number
+  MatcherHttpCode:
+    Description: For Application Load Balancers, you can specify values between 200 and 499.
+    Default: 200
+    Type: Number
+  Port:
+    Description: The port on which the targets receive traffic.
+    Default: 80
+    Type: Number
+  Protocol:
+    Description: The HealthCheckProtocol TCP/UDP etc.
+    AllowedValues: [HTTP, HTTPS, TCP, TCP_UDP, TLS, UDP]
+    Default: TCP
+    Type: String
+  TargetType:
+    Description: The HealthCheckProtocol TCP/UDP etc.
+    AllowedValues:
+      - instance
+      - ip
+      - lambda
+    Default: instance
+    Type: String
+  UnhealthyThresholdCount:
+    Description: The HealthCheckProtocol TCP/UDP etc.
+    Default: 2
+    Type: Number
+  VpcId:
+    Description: The HealthCheckProtocol TCP/UDP etc.
+    Default: 2
+    Type: AWS::EC2::VPC::Id
+  Target1Id:
+    Description: The target
+    Default: ""
+    Type: String
+  Target1Port:
+    Description: The target port
+    Default: ""
+    Type: String
+  Target2Id:
+    Description: The target
+    Default: ""
+    Type: String
+  Target2Port:
+    Description: The target port
+    Default: ""
+    Type: String
+Resources:
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: !Ref HealthCheckEnabled
+      HealthCheckIntervalSeconds: !Ref HealthCheckIntervalSeconds
+      HealthCheckPath: !Ref HealthCheckPath
+      HealthCheckPort: !Ref HealthCheckPort
+      HealthCheckProtocol: !Ref HealthCheckProtocol
+      HealthCheckTimeoutSeconds: !Ref HealthCheckTimeoutSeconds
+      HealthyThresholdCount: !Ref HealthyThresholdCount
+      Matcher:
+        HttpCode: !Ref MatcherHttpCode
+      Port: !Ref Port
+      Protocol: !Ref Protocol
+      Targets:
+        - Id: !Ref Target1Id
+          Port: !Ref Target1Port
+        - Id: !Ref Target2Id
+          Port: !Ref Target2Port
+      TargetType: !Ref TargetType
+      UnhealthyThresholdCount: !Ref UnhealthyThresholdCount
+      VpcId: !Ref VpcId

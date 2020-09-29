@@ -3,10 +3,6 @@ Parameters:
     Description: Type of IP address
     Type: String
     Default: ipv4
-  Name:
-    Description: Name of the load balancer.
-    Type: String
-    Default: My Load Balancer
   Scheme:
     Description: internet-facing or internal.
     Type: String
@@ -28,8 +24,11 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       IpAddressType: !Ref IpAddressType
-      Name: !Ref Name
       Scheme: !Ref Scheme
       SecurityGroups: !Ref SecurityGroups
       Subnets: !Ref Subnets
       Type: !Ref Type
+Outputs:
+  Arn:
+    Description: The Load Balancer ARN
+    Value: !Ref ALB

@@ -15,6 +15,10 @@ Parameters:
     Description: SubnetId
     Type: String
     Default: ""
+  SecurityGroups:
+    Description: List of Security Groups
+    Type: CommaDelimitedList
+    Default: ""
 Mappings:
   RegionMap:
     us-east-1:
@@ -39,8 +43,7 @@ Resources:
           - RegionMap
           - !Ref AWS::Region
           - AMI
-      SecurityGroupIds:
-        - !ImportValue SG-SecurityGroup1
+      SecurityGroupIds: !Ref SecurityGroups
       Tags:
         - Key: Name
           Value: !Ref NameOfService

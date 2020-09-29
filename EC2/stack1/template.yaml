@@ -1,9 +1,0 @@
-Resources:
-  Stack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      Parameters:
-        UserData: s3://cf-templates-g4ool1dn68hz-us-east-1/EC2/stack1/user-data.yaml
-        SubnetId: !ImportValue VPC-PublicSubnet1
-        NameOfService: instance 1
-      TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/EC2/template.yaml

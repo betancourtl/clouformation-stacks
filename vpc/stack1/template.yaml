@@ -1,7 +1,0 @@
-AWSTemplateFormatVersion: 2010-09-09
-
-Resources:
-  Stack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/VPC/template.yaml

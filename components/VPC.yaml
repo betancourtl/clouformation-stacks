@@ -333,40 +333,24 @@ Outputs:
   PublicSubnet1ID:
     Description: Public subnet ID
     Value: !Ref PublicSubnet1
-    Export:
-      Name: VPC-PublicSubnet1
   PublicSubnet2ID:
     Description: Public subnet ID
     Value: !Ref PublicSubnet2
-    Export:
-      Name: VPC-PublicSubnet2
   PublicSubnet3ID:
     Description: Public subnet ID
     Value: !Ref PublicSubnet3
-    Export:
-      Name: VPC-PublicSubnet3
   PrivateSubnet1ID:
     Description: Private subnet ID
     Value: !Ref PrivateSubnet1
-    Export:
-      Name: VPC-PrivateSubnet1
   PrivateSubnet2ID:
     Description: Private subnet ID
     Value: !Ref PrivateSubnet2
-    Export:
-      Name: VPC-PrivateSubnet2
   PrivateSubnet3ID:
     Description: Private subnet ID
     Value: !Ref PrivateSubnet3
-    Export:
-      Name: VPC-PrivateSubnet3
   SecurityGroup1ID:
     Description: SecurityGroup1ID
     Value: !Ref SecurityGroup1
-    Export:
-      Name: SG-SecurityGroup1
   VPCID:
     Description: VPC ID
     Value: !Ref VPC
-    Export:
-      Name: VPCID
