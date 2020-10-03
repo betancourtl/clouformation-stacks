@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  DBSubnetGroupName:
+    Type: String
+  DBClusterIdentifier:
+    Type: String
+  EnableIAMDatabaseAuthentication:
+    Type: String
+    AllowedValues: [true, false]
+    Default: false
+  Engine:
+    Type: String
+    Default: aurora-mysql
+  EngineMode:
+    Type: String
+    Default: provisioned
+  MasterUsername:
+    NoEcho: "true"
+    Description: Username for MySQL database access
+    Type: String
+    MinLength: "1"
+    MaxLength: "16"
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  MasterUserPassword:
+    NoEcho: "true"
+    Description: Password MySQL database access
+    Type: String
+    MinLength: "8"
+    MaxLength: "41"
+    AllowedPattern: "[a-zA-Z0-9]*"
+    ConstraintDescription: must contain only alphanumeric characters.
+  VpcSecurityGroupIds:
+    Type: List<AWS::EC2::SecurityGroup::Id>
+    Default: ""
+Resources:
+  RDSCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      DBClusterIdentifier: !Ref DBClusterIdentifier
+      DBSubnetGroupName: !Ref DBSubnetGroupName
+      EnableIAMDatabaseAuthentication: !Ref EnableIAMDatabaseAuthentication
+      Engine: !Ref Engine
+      EngineMode: !Ref EngineMode
+      MasterUsername: !Ref MasterUsername
+      MasterUserPassword: !Ref MasterUserPassword
+      VpcSecurityGroupIds: !Ref VpcSecurityGroupIds
+Outputs:
+  ClusterIdentifier:
+    Description: When you pass the logical ID of this resource to the intrinsic Ref function, Ref returns the name of the DB cluster.
+    Value: !Ref RDSCluster
+  EndpointAddress:
+    Description: RDSCluster.Endpoint.Address
+    Value: !GetAtt RDSCluster.Endpoint.Address
+  EndpointPort:
+    Description: Endpoint.Port
+    Value: !GetAtt RDSCluster.Endpoint.Port
+  ReadEndpointAddress:
+    Description: RDSCluster.ReadEndpoint.Address
+    Value: !GetAtt RDSCluster.ReadEndpoint.Address

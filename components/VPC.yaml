@@ -304,11 +304,10 @@ Resources:
       NatGatewayId: !Ref NATGateway
       RouteTableId: !Ref PrivateRouteTable
   # Security Groups
-  SecurityGroup1:
+  SecurityGroupEC2:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Allow http to client host
-      GroupName: VPC Security Group 1
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -329,6 +328,22 @@ Resources:
       Tags:
         - Key: Name
           Value: VPC Security Group
+  SecurityGroupDB:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to database
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: DB Security Group
 Outputs:
   PublicSubnet1ID:
     Description: Public subnet ID
@@ -348,9 +363,12 @@ Outputs:
   PrivateSubnet3ID:
     Description: Private subnet ID
     Value: !Ref PrivateSubnet3
-  SecurityGroup1ID:
-    Description: SecurityGroup1ID
-    Value: !Ref SecurityGroup1
+  SecurityGroupEC2:
+    Description: SecurityGroupEC2
+    Value: !Ref SecurityGroupEC2
+  SecurityGroupDB:
+    Description: SecurityGroupDB
+    Value: !Ref SecurityGroupDB
   VPCID:
     Description: VPC ID
     Value: !Ref VPC

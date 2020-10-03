@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+  DBSubnetGroupDescription:
+    Type: String
+    Default: Database Subnet Group
+Resources:
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Ref DBSubnetGroupDescription
+      SubnetIds: !Ref SubnetIds
+Outputs:
+  DBSubnetGroupName:
+    Description: When you pass the logical ID of this resource to the intrinsic Ref function, Ref returns the name of the DB subnet group.
+    Value: !Ref DBSubnetGroup

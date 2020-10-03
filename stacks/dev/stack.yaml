@@ -1,8 +1,11 @@
+AWSTemplateFormatVersion: "2010-09-09"
 Resources:
+  # App Architecture
   VPC:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/components/VPC.yaml
+  # Instances
   ALB:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -12,7 +15,7 @@ Resources:
         Scheme: internet-facing
         SecurityGroups: !Join
           - ","
-          - - !GetAtt VPC.Outputs.SecurityGroup1ID
+          - - !GetAtt VPC.Outputs.SecurityGroupEC2
         Subnets: !Join
           - ","
           - - !GetAtt VPC.Outputs.PublicSubnet1ID
@@ -60,7 +63,7 @@ Resources:
         NameOfService: instance 1
         SecurityGroups: !Join
           - ","
-          - - !GetAtt VPC.Outputs.SecurityGroup1ID
+          - - !GetAtt VPC.Outputs.SecurityGroupEC2
   EC2Instance2:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -71,4 +74,66 @@ Resources:
         NameOfService: instance 2
         SecurityGroups: !Join
           - ","
-          - - !GetAtt VPC.Outputs.SecurityGroup1ID
+          - - !GetAtt VPC.Outputs.SecurityGroupEC2
+  RDSSubnetGroup:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/components/DBSubnetGroup.yaml
+      Parameters:
+        DBSubnetGroupDescription: Private Database Subnet Group
+        SubnetIds: !Join
+          - ","
+          - - !GetAtt VPC.Outputs.PrivateSubnet1ID
+            - !GetAtt VPC.Outputs.PrivateSubnet2ID
+            - !GetAtt VPC.Outputs.PrivateSubnet3ID
+  # Database
+  SecretRDS:
+    Type: "AWS::SecretsManager::Secret"
+    Properties:
+      Description: "This is a Secrets Manager secret for an RDS DB instance"
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "admin"}'
+        GenerateStringKey: "password"
+        PasswordLength: 16
+        ExcludeCharacters: '"@/\'
+  SecretRDSInstanceAttachment:
+    Type: "AWS::SecretsManager::SecretTargetAttachment"
+    Properties:
+      SecretId: !Ref SecretRDS
+      TargetId: !Ref RDSCluster
+      TargetType: AWS::RDS::DBCluster
+  RDSCluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/components/RDSCluster.yaml
+      Parameters:
+        DBClusterIdentifier: aurora-mysql-cluster
+        DBSubnetGroupName: !GetAtt RDSSubnetGroup.Outputs.DBSubnetGroupName
+        EnableIAMDatabaseAuthentication: false
+        Engine: aurora-mysql
+        EngineMode: provisioned
+        MasterUsername: !Join
+          - ""
+          - - "{{resolve:secretsmanager:"
+            - !Ref SecretRDS
+            - ":SecretString:username}}"
+        MasterUserPassword: !Join
+          - ""
+          - - "{{resolve:secretsmanager:"
+            - !Ref SecretRDS
+            - ":SecretString:password}}"
+        VpcSecurityGroupIds: !Join
+          - ","
+          - - !GetAtt VPC.Outputs.SecurityGroupDB
+  RDSWritter:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/components/RDSDBInstance.yaml
+      Parameters:
+        DBClusterIdentifier: !GetAtt RDSCluster.Outputs.ClusterIdentifier
+        DBInstanceIdentifier: aurora-mysql-instance1
+        DBInstanceClass: db.t2.small
+        DBSubnetGroupName: !GetAtt RDSSubnetGroup.Outputs.DBSubnetGroupName
+        Engine: aurora-mysql
+        MonitoringInterval: 0
+        PubliclyAccessible: false

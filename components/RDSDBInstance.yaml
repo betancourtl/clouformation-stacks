@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  DBClusterIdentifier:
+    Type: String
+    Default: ""
+  DBInstanceClass:
+    Type: String
+    Default: db.t2.small
+  DBInstanceIdentifier:
+    Type: String
+  DBSubnetGroupName:
+    Type: String
+  DeleteAutomatedBackups:
+    Type: String
+    AllowedValues: [true, false]
+    Default: true
+  Engine:
+    Type: String
+    AllowedValues: [aurora-mysql, aurora-postgresql]
+    Default: aurora-mysql
+  MonitoringInterval:
+    Type: Number
+    Default: 0
+  PubliclyAccessible:
+    Type: String
+    AllowedValues: [true, false]
+    Default: false
+Resources:
+  DBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref DBClusterIdentifier
+      DBInstanceClass: !Ref DBInstanceClass
+      DBSubnetGroupName: !Ref DBSubnetGroupName
+      DBInstanceIdentifier: !Ref DBInstanceIdentifier
+      DeleteAutomatedBackups: !Ref DeleteAutomatedBackups
+      Engine: !Ref Engine
+      MonitoringInterval: !Ref MonitoringInterval
+      PubliclyAccessible: !Ref PubliclyAccessible
+Outputs:
+  InstanceId:
+    Description: The DBInstance
+    Value: !Ref DBInstance
