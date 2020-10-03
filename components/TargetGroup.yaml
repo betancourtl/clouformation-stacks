@@ -19,7 +19,7 @@ Parameters:
   HealthCheckProtocol:
     Description: The HealthCheckProtocol TCP/UDP etc.
     AllowedValues: [HTTP, HTTPS, TCP, TCP_UDP, TLS, UDP]
-    Default: TCP
+    Default: HTTP
     Type: String
   HealthCheckTimeoutSeconds:
     Description: The amount of time, in seconds, during which no response from a target means a failed health check.
@@ -40,7 +40,7 @@ Parameters:
   Protocol:
     Description: The HealthCheckProtocol TCP/UDP etc.
     AllowedValues: [HTTP, HTTPS, TCP, TCP_UDP, TLS, UDP]
-    Default: TCP
+    Default: HTTP
     Type: String
   TargetType:
     Description: The HealthCheckProtocol TCP/UDP etc.
@@ -97,3 +97,7 @@ Resources:
       TargetType: !Ref TargetType
       UnhealthyThresholdCount: !Ref UnhealthyThresholdCount
       VpcId: !Ref VpcId
+Outputs:
+  TargetGroupArn:
+    Description: The TargetGroup Arn
+    Value: !Ref TargetGroup

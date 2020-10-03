@@ -3,6 +3,53 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/components/VPC.yaml
+  ALB:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/components/LoadBalancer.yaml
+      Parameters:
+        IpAddressType: ipv4
+        Scheme: internet-facing
+        SecurityGroups: !Join
+          - ","
+          - - !GetAtt VPC.Outputs.SecurityGroup1ID
+        Subnets: !Join
+          - ","
+          - - !GetAtt VPC.Outputs.PublicSubnet1ID
+            - !GetAtt VPC.Outputs.PublicSubnet2ID
+            - !GetAtt VPC.Outputs.PublicSubnet3ID
+        Type: application
+  LoadBalancerListener:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/components/LoadBalancerListener.yaml
+      Parameters:
+        LoadBalancerArn: !GetAtt ALB.Outputs.Arn
+        Port: 80
+        Protocol: HTTP
+        TargetGroupArn: !GetAtt TargetGroup.Outputs.TargetGroupArn
+  TargetGroup:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/components/TargetGroup.yaml
+      Parameters:
+        HealthCheckEnabled: true
+        HealthCheckIntervalSeconds: 30
+        HealthCheckPath: /index.html
+        HealthCheckPort: traffic-port
+        HealthCheckProtocol: HTTP
+        HealthCheckTimeoutSeconds: 5
+        HealthyThresholdCount: 5
+        MatcherHttpCode: 200
+        Port: 80
+        Protocol: HTTP
+        TargetType: instance
+        UnhealthyThresholdCount: 2
+        VpcId: !GetAtt VPC.Outputs.VPCID
+        Target1Id: !GetAtt EC2Instance1.Outputs.InstanceId
+        Target1Port: 80
+        Target2Id: !GetAtt EC2Instance2.Outputs.InstanceId
+        Target2Port: 80
   EC2Instance1:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -25,49 +72,3 @@ Resources:
         SecurityGroups: !Join
           - ","
           - - !GetAtt VPC.Outputs.SecurityGroup1ID
-  # ALB:
-  #   Type: AWS::CloudFormation::Stack
-  #   Properties:
-  #     TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/components/LoadBalancer.yaml
-  #     Parameters:
-  #       IpAddressType: ipv4
-  #       Scheme: internet-facing
-  #       SecurityGroups: !Join
-  #         - ","
-  #         - - !GetAtt VPC.Outputs.SecurityGroup1ID
-  #       Subnets: !Join
-  #         - ","
-  #         - - !GetAtt VPC.Outputs.PublicSubnet1ID
-  #           - !GetAtt VPC.Outputs.PublicSubnet2ID
-  #           - !GetAtt VPC.Outputs.PublicSubnet3ID
-  #       Type: application
-  # TargetGroup:
-  #   Type: AWS::CloudFormation::Stack
-  #   Properties:
-  #     TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/components/TargetGroup.yaml
-  #     Parameters:
-  #       HealthCheckEnabled: true
-  #       HealthCheckIntervalSeconds: 30
-  #       HealthCheckPath: /index.html
-  #       HealthCheckPort: traffic-port
-  #       HealthCheckProtocol: TCP
-  #       HealthCheckTimeoutSeconds: 5
-  #       HealthyThresholdCount: 5
-  #       MatcherHttpCode: 200
-  #       Port: 80
-  #       Protocol: TCP
-  #       TargetType: instance
-  #       UnhealthyThresholdCount: 2
-  #       VpcId: !GetAtt VPC.Outputs.VPCID
-  #       Target1Id: !Ref EC2Instance1
-  #       Target1Port: 80
-  #       Target2Id: !Ref EC2Instance2
-  #       Target2Port: 80
-  # LoadBalancerListener:
-  #   Type: AWS::CloudFormation::Stack
-  #   Properties:
-  #     TemplateURL: https://cf-templates-g4ool1dn68hz-us-east-1.s3.amazonaws.com/components/LoadBalancerListener.yaml
-  #     Parameters:
-  #       LoadBalancerArn: !GetAtt ALB.Outputs.Arn
-  #       Port: 80
-  #       Protocol: TCP
