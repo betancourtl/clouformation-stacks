@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Resources:
-  # App Architecture
+  # Networking
   VPC:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -75,6 +75,7 @@ Resources:
         SecurityGroups: !Join
           - ","
           - - !GetAtt VPC.Outputs.SecurityGroupEC2
+  # Database
   RDSSubnetGroup:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -86,21 +87,24 @@ Resources:
           - - !GetAtt VPC.Outputs.PrivateSubnet1ID
             - !GetAtt VPC.Outputs.PrivateSubnet2ID
             - !GetAtt VPC.Outputs.PrivateSubnet3ID
-  # Database
   SecretRDS:
     Type: "AWS::SecretsManager::Secret"
     Properties:
       Description: "This is a Secrets Manager secret for an RDS DB instance"
       GenerateSecretString:
-        SecretStringTemplate: '{"username": "admin"}'
+        ExcludeNumbers: false
+        ExcludePunctuation: true
+        ExcludeUppercase: false
         GenerateStringKey: "password"
+        IncludeSpace: false
+        RequireEachIncludedType: true
         PasswordLength: 16
-        ExcludeCharacters: '"@/\'
+        SecretStringTemplate: '{"username": "admin"}'
   SecretRDSInstanceAttachment:
     Type: "AWS::SecretsManager::SecretTargetAttachment"
     Properties:
       SecretId: !Ref SecretRDS
-      TargetId: !Ref RDSCluster
+      TargetId: !GetAtt RDSCluster.Outputs.ClusterIdentifier
       TargetType: AWS::RDS::DBCluster
   RDSCluster:
     Type: AWS::CloudFormation::Stack
