@@ -47,7 +47,7 @@ Resources:
       Parameters:
         HealthCheckEnabled: true
         HealthCheckIntervalSeconds: 30
-        HealthCheckPath: /index.html
+        HealthCheckPath: /chat
         HealthCheckPort: traffic-port
         HealthCheckProtocol: HTTP
         HealthCheckTimeoutSeconds: 5
