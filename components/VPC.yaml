@@ -22,18 +22,18 @@ Resources:
       Tags:
         - Key: Name
           Value: internet-gateway
-  NATGateway:
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId: !GetAtt EIP.AllocationId
-      SubnetId: !Ref PublicSubnet1
-      Tags:
-        - Key: Name
-          Value: nat
-  EIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
+  # NATGateway:
+  #   Type: AWS::EC2::NatGateway
+  #   Properties:
+  #     AllocationId: !GetAtt EIP.AllocationId
+  #     SubnetId: !Ref PublicSubnet1
+  #     Tags:
+  #       - Key: Name
+  #         Value: nat
+  # EIP:
+  #   Type: AWS::EC2::EIP
+  #   Properties:
+  #     Domain: vpc
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
@@ -297,12 +297,12 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateSubnet3
-  PrivateRoute1:
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NATGateway
-      RouteTableId: !Ref PrivateRouteTable
+  # PrivateRoute1:
+  #   Type: AWS::EC2::Route
+  #   Properties:
+  #     DestinationCidrBlock: 0.0.0.0/0
+  #     NatGatewayId: !Ref NATGateway
+  #     RouteTableId: !Ref PrivateRouteTable
   # Security Groups
   SecurityGroupEC2:
     Type: AWS::EC2::SecurityGroup

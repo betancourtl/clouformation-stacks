@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ######################################################################
-# Docker - Debian9
+# Docker - Debian10
 # https://linuxize.com/post/how-to-install-and-use-docker-on-debian-10/
 ######################################################################
-          
+
 # Uninstall old versions
 sudo apt remove docker docker-engine docker.io containerd runc || true
 
@@ -35,5 +35,5 @@ sudo apt-get update
 # Install latest version off Docker Engine
 echo Y | sudo apt-get install docker-ce docker-ce-cli containerd.io
 
-# Add user to docker to prevent having to sudo the Docker commands.  
+# Add user to docker to prevent having to sudo the Docker commands.
 sudo usermod -aG docker $USER

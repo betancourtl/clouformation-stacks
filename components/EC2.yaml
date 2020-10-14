@@ -7,10 +7,6 @@ Parameters:
     Description: Name of an existing EC2 KeyPair to enable SSH access into the server
     Type: String
     Default: aws-eb
-  UserData:
-    Description: EC2 instance bootstrap script
-    Type: String
-    Default: "#!/bin/bash"
   SubnetId:
     Description: SubnetId
     Type: String
@@ -49,10 +45,6 @@ Resources:
           Value: !Ref NameOfService
       KeyName: !Ref KeyName
       SubnetId: !Ref SubnetId
-      "Fn::Transform":
-        Name: "AWS::Include"
-        Parameters:
-          Location: !Ref UserData
 Outputs:
   Website:
     Description: The Public DNS for the EC2 Instance

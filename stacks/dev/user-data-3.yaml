@@ -1,0 +1,87 @@
+"Fn::Base64": |
+  #!/bin/bash
+
+  # Update repository
+  sudo apt update
+
+  ######################################################################
+  # Time Config
+  ######################################################################
+
+  # Changes the timezone so we can see relevant the log times.
+  sudo timedatectl set-timezone America/New_York
+
+
+  ######################################################################
+  # Docker - Debian10
+  # https://linuxize.com/post/how-to-install-and-use-docker-on-debian-10/
+  ######################################################################
+
+  # Uninstall old versions
+  sudo apt remove docker docker-engine docker.io containerd runc || true
+
+  # Update packages
+  sudo apt update
+
+  # Install packages to allow apt to use a repository over HTTPS:
+  echo Y |
+      sudo apt-get install \
+      apt-transport-https \
+      ca-certificates \
+      curl \
+      gnupg-agent \
+      software-properties-common
+
+  # Add docker official GPG keys
+  curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+
+  # Set up stable repository
+  sudo add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/debian \
+    $(lsb_release -cs) \
+    stable"
+
+  # Update packages
+  sudo apt-get update
+
+  # Install latest version off Docker Engine
+  echo Y | sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+  # Add user to docker to prevent having to sudo the Docker commands.
+  sudo usermod -aG docker $USER
+
+
+######################################################################
+# Docker Compose
+# https://docs.docker.com/compose/install/
+######################################################################
+
+# Download
+sudo curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+# Add executable permissions
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Create Symlink
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+######################################################################
+# python3.8
+######################################################################
+
+sudo apt update -y
+sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl libbz2-dev -y
+
+# download latest
+curl -O https://www.python.org/ftp/python/3.8.2/Python-3.8.2.tar.xz
+
+# untar
+tar -xf Python-3.8.2.tar.xz
+
+cd Python-3.8.2
+./configure --enable-optimizations
+
+sudo make -j $(nproc)
+
+# Do not use the standard make install as it will overwrite the default system python3 binary.
+sudo make altinstall

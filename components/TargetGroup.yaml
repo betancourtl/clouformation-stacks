@@ -92,8 +92,6 @@ Resources:
       Targets:
         - Id: !Ref Target1Id
           Port: !Ref Target1Port
-        - Id: !Ref Target2Id
-          Port: !Ref Target2Port
       TargetType: !Ref TargetType
       UnhealthyThresholdCount: !Ref UnhealthyThresholdCount
       VpcId: !Ref VpcId

@@ -1,42 +1,41 @@
-UserData:
-  "Fn::Base64": |
-    #!/bin/bash
+"Fn::Base64": |
+  #!/bin/bash
 
-    # Update repository
-    sudo apt update
+  # Update repository
+  sudo apt update
 
-    ######################################################################
-    # Time Config
-    ######################################################################
+  ######################################################################
+  # Time Config
+  ######################################################################
 
-    # Changes the timezone so we can see relevant the log times.
-    sudo timedatectl set-timezone America/New_York
+  # Changes the timezone so we can see relevant the log times.
+  sudo timedatectl set-timezone America/New_York
 
-    ######################################################################
-    # apache2
-    ######################################################################
+  ######################################################################
+  # apache2
+  ######################################################################
 
-    # Install apache
-    sudo apt install apache2 -y
+  # Install apache
+  sudo apt install apache2 -y
 
-    # Turn on mod_rewrite
-    sudo a2enmod rewrite -y
+  # Turn on mod_rewrite
+  sudo a2enmod rewrite -y
 
-    # Restart apache
-    sudo systemctl restart apache2
+  # Restart apache
+  sudo systemctl restart apache2
 
-    ######################################################################
-    # WebServer
-    ######################################################################
+  ######################################################################
+  # WebServer
+  ######################################################################
 
-    # cd into /var/www/html
-    cd /var/www/html
+  # cd into /var/www/html
+  cd /var/www/html
 
-    # write the content into our index.html file
-    echo "
-    <html>
-      <body>
-        <h1>My App 2</h1>
-      </body>
-    </html>
-    " | sudo tee ./index.html
+  # write the content into our index.html file
+  echo "
+  <html>
+    <body>
+      <h1>My App 2</h1>
+    </body>
+  </html>
+  " | sudo tee ./index.html
